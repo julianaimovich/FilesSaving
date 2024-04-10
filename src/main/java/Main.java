@@ -1,7 +1,6 @@
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -26,14 +25,18 @@ public class Main {
         saveProgress(thirdPlayerProgress, thirdFileName);
 
         filesToZipArchive(progressFiles);
+
+        deleteFile(firstFileName);
+        deleteFile(secondFileName);
+        deleteFile(thirdFileName);
     }
 
     public static String getFileName(int number) {
         return progressDirectory.getPath() + "/save" + number + ".dat";
     }
 
-    public static void saveProgress(GameProgress progress, String name) {
-        try (FileOutputStream fos = new FileOutputStream(name);
+    public static void saveProgress(GameProgress progress, String fileName) {
+        try (FileOutputStream fos = new FileOutputStream(fileName);
              ObjectOutputStream oos = new ObjectOutputStream(fos)) {
             oos.writeObject(progress);
         } catch (Exception ex) {
@@ -50,11 +53,20 @@ public class Main {
                 zout.putNextEntry(entry);
                 byte[] buffer = new byte[fis.available()];
                 fis.read(buffer);
+                fis.close();
                 zout.write(buffer);
                 zout.closeEntry();
             }
-        } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void deleteFile(String fileName) {
+        try {
+            Files.delete(Path.of(fileName));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
